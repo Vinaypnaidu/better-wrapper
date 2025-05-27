@@ -7,6 +7,11 @@ setup(
     install_requires=[
         'fastapi',
         'uvicorn',
+        'openai',
+        'python-dotenv',
+        'sqlalchemy',
+        'psycopg2-binary',  # PostgreSQL adapter
+        'alembic',          # For database migrations
     ],
     entry_points={
         'console_scripts': [],

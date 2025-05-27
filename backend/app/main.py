@@ -1,24 +1,27 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from app.core.config import settings
+from app.api import router as api_router
+from app.db.init_db import init_db
 
-app = FastAPI()
+app = FastAPI(title="Chat API")
 
-# Allow CORS for local frontend
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"] ,
-    allow_headers=["*"] ,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-class MessageRequest(BaseModel):
-    message: str
+# Initialize database
+init_db()
 
-class MessageResponse(BaseModel):
-    reply: str
+# Include API routes
+app.include_router(api_router, prefix=settings.API_PREFIX)
 
-@app.post("/", response_model=MessageResponse)
-def chat_endpoint(req: MessageRequest):
-    return {"reply": "hello"} 
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
