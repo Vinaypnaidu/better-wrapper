@@ -1,0 +1,14 @@
+from setuptools import setup, find_packages
+
+setup(
+    name='backend',
+    version='0.1.0',
+    packages=find_packages(include=["app*"]),
+    install_requires=[
+        'fastapi',
+        'uvicorn',
+    ],
+    entry_points={
+        'console_scripts': [],
+    },
+) 
