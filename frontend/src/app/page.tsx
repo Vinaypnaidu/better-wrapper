@@ -73,6 +73,7 @@ type Conversation = {
   summary?: string | null;
   created_at: string;
   updated_at: string;
+  messages?: Message[];
 };
 
 type ConversationDetail = {
@@ -269,65 +270,63 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#202123] flex font-sans transition-colors duration-300">
+    <div className="min-h-screen w-full bg-[#202123] flex font-sans transition-colors duration-300 overflow-hidden">
       {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed md:relative z-20 w-64 h-screen bg-[#1a1b1e] border-r border-gray-800 transition-transform duration-200 md:translate-x-0`}
+        } fixed md:relative z-20 w-64 h-screen bg-[#1a1b1e] border-r border-gray-800 transition-transform duration-200 md:translate-x-0 flex flex-col`}
       >
-        <div className="flex flex-col h-full">
-          {/* New Chat Button */}
-          <div className="p-4 border-b border-gray-800">
-            <button
-              onClick={startNewConversation}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#2a2b32] hover:bg-[#343541] text-white rounded-lg transition-colors"
-            >
-              <PlusIcon />
-              <span>New Chat</span>
-            </button>
-          </div>
+        {/* New Chat Button */}
+        <div className="p-4 border-b border-gray-800 flex-shrink-0">
+          <button
+            onClick={startNewConversation}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#2a2b32] hover:bg-[#343541] text-white rounded-lg transition-colors"
+          >
+            <PlusIcon />
+            <span>New Chat</span>
+          </button>
+        </div>
 
-          {/* Recent Chats */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-4">
-              <h2 className="text-white text-sm font-medium mb-3">Recent Chats</h2>
-              <div className="space-y-2">
-                {conversations.slice(0, visibleConversations).map((conv) => (
-                  <button
-                    key={conv.id}
-                    onClick={() => loadConversation(conv.id)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      conversationId === conv.id
-                        ? 'bg-[#343541] text-white'
-                        : 'text-gray-300 hover:bg-[#2a2b32]'
-                    }`}
-                  >
-                    <div className="text-sm font-medium truncate">
-                      {formatTitle(conv.title, conv.messages)}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {formatDate(conv.created_at)}
-                    </div>
-                  </button>
-                ))}
-
-                {conversations.length > visibleConversations && (
-                  <button
-                    onClick={loadMoreConversations}
-                    className="w-full text-center py-2 text-sm text-gray-400 hover:text-white transition-colors"
-                  >
-                    Load More
-                    <ChevronDownIcon className="ml-1 inline" />
-                  </button>
-                )}
-
-                {conversations.length === 0 && (
-                  <div className="text-center py-4 text-gray-400 text-sm">
-                    No conversations yet
+        {/* Recent Chats - Independent scrollable area */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="p-4">
+            <h2 className="text-white text-sm font-medium mb-3">Recent Chats</h2>
+            <div className="space-y-2">
+              {conversations.slice(0, visibleConversations).map((conv) => (
+                <button
+                  key={conv.id}
+                  onClick={() => loadConversation(conv.id)}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    conversationId === conv.id
+                      ? 'bg-[#343541] text-white'
+                      : 'text-gray-300 hover:bg-[#2a2b32]'
+                  }`}
+                >
+                  <div className="text-sm font-medium truncate">
+                    {formatTitle(conv.title, conv.messages)}
                   </div>
-                )}
-              </div>
+                  <div className="text-xs text-gray-400">
+                    {formatDate(conv.created_at)}
+                  </div>
+                </button>
+              ))}
+
+              {conversations.length > visibleConversations && (
+                <button
+                  onClick={loadMoreConversations}
+                  className="w-full text-center py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                >
+                  Load More
+                  <ChevronDownIcon className="ml-1 inline" />
+                </button>
+              )}
+
+              {conversations.length === 0 && (
+                <div className="text-center py-4 text-gray-400 text-sm">
+                  No conversations yet
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -343,11 +342,11 @@ export default function Home() {
         </button>
       )}
 
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col ${isMobile && sidebarOpen ? 'opacity-50' : ''}`}>
+      {/* Main Content - Independent scrollable area */}
+      <div className={`flex-1 flex flex-col h-screen overflow-hidden ${isMobile && sidebarOpen ? 'opacity-50' : ''}`}>
         {/* Initial state - show centered card */}
         {messages.length === 0 && !loading ? (
-          <div className="min-h-screen w-full flex flex-col items-center justify-center px-4">
+          <div className="h-full w-full flex flex-col items-center justify-center px-4">
             <form
               onSubmit={handleSubmit}
               className="w-full max-w-3xl flex flex-col items-center"
@@ -377,8 +376,9 @@ export default function Home() {
         ) : (
           // Full chat interface after first message
           <>
-            <div className="flex-1 w-full flex flex-col items-center justify-between pb-32">
-              <div className="w-full max-w-2xl mx-auto flex flex-col gap-6 pt-10 px-4 sm:px-0">
+            {/* Messages area - scrollable */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <div className="w-full max-w-2xl mx-auto flex flex-col gap-6 pt-10 px-4 sm:px-0 pb-4">
                 {messages.map((msg, idx) => (
                   <div
                     key={idx}
@@ -408,30 +408,31 @@ export default function Home() {
                 <div ref={messagesEndRef} />
               </div>
             </div>
-            <form
-              onSubmit={handleSubmit}
-              className="fixed bottom-0 left-0 w-full flex justify-center bg-gradient-to-t from-[#202123] via-[#202123]/80 to-transparent pt-8 pb-4 px-4 z-10"
-            >
-              <div className="w-full max-w-3xl bg-[#2a2b32] rounded-3xl shadow-xl px-4 py-4 flex items-center gap-3">
-                <input
-                  className="flex-1 bg-transparent outline-none border-none text-xl text-white placeholder-gray-400 py-3 px-2"
-                  type="text"
-                  placeholder="Ask anything..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  disabled={loading}
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-200 disabled:opacity-50 transition"
-                  disabled={loading || !input.trim()}
-                  aria-label="Send"
-                >
-                  <SendIcon className="w-5 h-5" />
-                </button>
-              </div>
-            </form>
+            
+            {/* Input form - fixed at bottom */}
+            <div className="flex-shrink-0 bg-gradient-to-t from-[#202123] via-[#202123]/80 to-transparent pt-8 pb-4 px-4">
+              <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto">
+                <div className="bg-[#2a2b32] rounded-3xl shadow-xl px-4 py-4 flex items-center gap-3">
+                  <input
+                    className="flex-1 bg-transparent outline-none border-none text-xl text-white placeholder-gray-400 py-3 px-2"
+                    type="text"
+                    placeholder="Ask anything..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    disabled={loading}
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-200 disabled:opacity-50 transition"
+                    disabled={loading || !input.trim()}
+                    aria-label="Send"
+                  >
+                    <SendIcon className="w-5 h-5" />
+                  </button>
+                </div>
+              </form>
+            </div>
           </>
         )}
       </div>
